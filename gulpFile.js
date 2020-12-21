@@ -9,7 +9,7 @@ const webpack = require('webpack-stream');
 
 function html() {
     return src('src/*.html')
-        .pipe(dest('dist/'))
+        .pipe(dest('docs/'))
         .pipe(browserSync.stream());
 }
 
@@ -21,7 +21,7 @@ function styles() {
             overrideBrowserslist: ['last 5 versions']
         }))
         .pipe(concat('main.css'))
-        .pipe(dest('dist/css/'))
+        .pipe(dest('docs/css/'))
         .pipe(browserSync.stream());
 }
 
@@ -36,25 +36,21 @@ function javaScript() {
     return src('src/js/*.js')
         .pipe(webpack())
         .pipe(concat('main.js'))
-        .pipe(dest('dist/js/'))
+        .pipe(dest('docs/js/'))
         .pipe(browserSync.stream());
 }
 
 function images() {
     return src('src/images/**/*')
         .pipe(imagemin())
-        .pipe(dest('dist/images/'))
+        .pipe(dest('docs/images/'))
         .pipe(browserSync.stream());
-}
-
-function build() {
-    return parallel(images, typeScript, styles, html, javaScript);
 }
 
 function reloadingBrowser() {
     browserSync.init({
         server: {
-            baseDir: 'dist/'
+            baseDir: 'docs/'
         }
     });
 }
@@ -67,4 +63,5 @@ function watching() {
     watch('src/images/**/*', parallel(images));
 }
 
-exports.default = parallel(build, watching, reloadingBrowser);
+exports.build = parallel(images, typeScript, styles, html, javaScript);
+exports.default = parallel(exports.build, watching, reloadingBrowser);
